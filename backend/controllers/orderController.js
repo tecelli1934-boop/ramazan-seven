@@ -16,6 +16,8 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     paymentMethod
   } = req.body;
 
+  console.log('Yeni Sipariş İsteği Geldi:', JSON.stringify(req.body, null, 2));
+
   // Check if order items exist
   if (!orderItems || orderItems.length === 0) {
     return next(new AppError('Siparişte ürün bulunamadı', 400));
@@ -26,10 +28,15 @@ exports.createOrder = catchAsync(async (req, res, next) => {
   const processedOrderItems = [];
 
   for (const item of orderItems) {
-    const product = await Product.findById(item.id);
+    console.log(`Ürün aranıyor ID: ${item.id}`);
+    const product = await Product.findById(item.id).catch(err => {
+      console.error(`Ürün arama hatası (ID: ${item.id}):`, err.message);
+      return null;
+    });
     
     if (!product) {
-      return next(new AppError(`${item.name} ürünü bulunamadı`, 404));
+      console.warn(`Ürün bulunamadı ID: ${item.id}`);
+      return next(new AppError(`${item.name || 'Bilinmeyen'} ürünü veritabanında bulunamadı (ID: ${item.id})`, 400));
     }
 
     if (product.stock < item.quantity) {
@@ -84,7 +91,7 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     subtotal: itemsPrice,
     kdv: kdv,
     total: total,
-    paymentMethod: paymentMethod || 'cash',
+    paymentMethod: paymentMethod || 'credit_card',
     status: 'pending'
   });
 
@@ -97,25 +104,6 @@ exports.createOrder = catchAsync(async (req, res, next) => {
     const user = await User.findOne({ email: order.customerEmail });
     if (user && user.fcmTokens && user.fcmTokens.length > 0) {
       await fcmService.sendOrderConfirmationPush(user.fcmTokens, order.id);
-    }
-    
-    // 3. Admin Notification (Banka havalesi için)
-    if (paymentMethod === 'bank_transfer') {
-      const adminUsers = await User.find({ role: 'admin' });
-      for (const admin of adminUsers) {
-        if (admin.fcmTokens && admin.fcmTokens.length > 0) {
-          await fcmService.sendNewOrderNotification(admin.fcmTokens, {
-            title: 'Yeni Sipariş!',
-            body: `${order.customerName} banka havalesi ile yeni sipariş verdi: #${order.id}`,
-            data: {
-              orderId: order.id.toString(),
-              customerName: order.customerName,
-              paymentMethod: 'bank_transfer',
-              amount: total
-            }
-          });
-        }
-      }
     }
   } catch (err) {
     console.error('Bildirim gönderim hatası (Sipariş Onayı):', err);

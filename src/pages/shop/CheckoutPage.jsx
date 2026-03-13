@@ -20,7 +20,7 @@ const CheckoutPage = () => {
     phone: user?.phone || '',
     address: user?.address || '',
     city: user?.city || '',
-    paymentMethod: 'bank_transfer'
+    paymentMethod: 'credit_card'
   });
 
   const [legalAccepted, setLegalAccepted] = useState(false);
@@ -180,7 +180,7 @@ const CheckoutPage = () => {
         customerEmail: formData.email,
         customerPhone: formData.phone,
         address: `${formData.address}, ${formData.city}`,
-        paymentMethod: formData.paymentMethod === 'credit_card' ? 'credit_card' : 'bank_transfer',
+        paymentMethod: 'credit_card',
         shippingAddress: {
           street: formData.address,
           city: formData.city,
@@ -251,24 +251,10 @@ const CheckoutPage = () => {
           <div className="bg-secondary-50 p-4 rounded text-left mb-6 text-sm">
             <p><strong>Teslimat:</strong> {formData.name}</p>
             <p><strong>E-posta:</strong> {formData.email}</p>
-            <p><strong>Ödeme Yöntemi:</strong> {formData.paymentMethod === 'bank_transfer' ? 'Banka Havalesi / EFT' : 'Kredi Kartı'}</p>
+            <p><strong>Ödeme Yöntemi:</strong> Kredi Kartı</p>
           </div>
 
-          {formData.paymentMethod === 'bank_transfer' && (
-            <div className="bg-primary-50 border border-primary-100 p-5 rounded-lg text-left mb-6">
-              <h3 className="text-primary-800 font-bold mb-3 flex items-center gap-2">
-                <CreditCard className="w-4 h-4" /> Ödeme Bilgileri
-              </h3>
-              <div className="space-y-2 text-sm text-secondary-700">
-                <p><strong>Firma Adı:</strong> RS YAPI VE İNŞAAT MALZEMELERİ</p>
-                <p><strong>Banka:</strong> [LÜTFEN BANKA ADINI BURAYA YAZINIZ]</p>
-                <div className="bg-white p-3 border border-primary-200 rounded font-mono text-xs break-all">
-                  <strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00
-                </div>
-                <p className="text-[10px] text-secondary-500 mt-2 italic">* Lütfen açıklama kısmına sipariş numaranızı <strong>#{orderId?.slice(-6).toUpperCase()}</strong> yazmayı unutmayınız. Ödemeniz onaylandıktan sonra siparişiniz işleme alınacaktır.</p>
-              </div>
-            </div>
-          )}
+
           <Link to="/urunler" className="inline-block bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition">
             Alışverişe Devam Et
           </Link>
@@ -359,44 +345,33 @@ const CheckoutPage = () => {
               <CreditCard className="w-5 h-5 text-primary-600" /> Ödeme Yöntemi
             </h2>
             <div className="space-y-3">
-              <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${formData.paymentMethod === 'bank_transfer' ? 'border-primary-500 bg-primary-50' : 'border-secondary-200 hover:bg-secondary-50'}`}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="bank_transfer"
-                  checked={formData.paymentMethod === 'bank_transfer'}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-primary-600"
-                />
-                <div className="ml-3">
-                  <span className="block font-bold text-secondary-800">Banka Havalesi / EFT</span>
-                  <span className="text-xs text-secondary-500">Sipariş sonrası IBAN bilgilerini göreceksiniz.</span>
-                </div>
-              </label>
 
-              <label className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all ${formData.paymentMethod === 'credit_card' ? 'border-primary-500 bg-primary-50' : 'border-secondary-200 hover:bg-secondary-50'}`}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value="credit_card"
-                  checked={formData.paymentMethod === 'credit_card'}
-                  onChange={handleChange}
-                  className="w-4 h-4 text-primary-600"
-                />
-                <div className="ml-3">
-                  <span className="block font-bold text-secondary-800">Kredi Kartı / Banka Kartı</span>
-                  <span className="text-xs text-secondary-500">Kuveyt Türk altyapısı ile güvenli ödeme.</span>
-                </div>
-              </label>
 
-              {formData.paymentMethod === 'credit_card' && (
+              <div className="p-4 border border-primary-500 bg-primary-50 rounded-xl">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="credit_card"
+                    checked={true}
+                    readOnly
+                    className="w-4 h-4 text-primary-600"
+                  />
+                  <div className="ml-3">
+                    <span className="block font-bold text-secondary-800">Kredi Kartı / Banka Kartı</span>
+                    <span className="text-xs text-secondary-500">Kuveyt Türk altyapısı ile güvenli ödeme.</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4">
                 <CreditCardForm 
                   onSubmit={handleCreditCardSubmit} 
                   amount={total} 
                   isSubmitting={isSubmitting} 
                   disabled={!legalAccepted}
                 />
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -489,17 +464,7 @@ const CheckoutPage = () => {
               </div>
             </div>
 
-            {formData.paymentMethod !== 'credit_card' && (
-              <button 
-                type="submit"
-                disabled={isSubmitting || cart.items.length === 0 || !legalAccepted}
-                className={`w-full py-4 rounded-xl font-bold text-white shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 active:scale-95 ${
-                  isSubmitting || !legalAccepted ? 'bg-secondary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'
-                }`}
-              >
-                {isSubmitting ? 'İşleniyor...' : 'Siparişi Onayla'}
-              </button>
-            )}
+
 
             <div className="mt-6 space-y-3 pt-6 border-t border-secondary-100">
               <div className="flex items-center gap-2 text-xs text-secondary-500">

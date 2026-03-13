@@ -20,7 +20,7 @@ const orderValidation = [
   body('orderItems.*.quantity').isInt({ min: 1 }).withMessage('Ürün adedi en az 1 olmalıdır'),
   body('orderItems.*.price').isFloat({ min: 0 }).withMessage('Ürün fiyatı negatif olamaz'),
   body('shippingAddress').notEmpty().withMessage('Teslimat adresi zorunludur'),
-  body('paymentMethod').isIn(['credit_card', 'bank_transfer']).withMessage('Geçersiz ödeme yöntemi'),
+  body('paymentMethod').isIn(['credit_card', 'cash']).withMessage('Geçersiz ödeme yöntemi'),
   body('totalAmount').isFloat({ min: 0 }).withMessage('Toplam tutar geçersiz')
 ];
 
