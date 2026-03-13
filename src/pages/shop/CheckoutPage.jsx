@@ -167,7 +167,7 @@ const CheckoutPage = () => {
       }
 
       const orderData = {
-        items: cart.items.map(item => ({
+        orderItems: cart.items.map(item => ({
           id: item.id || item._id,
           name: item.name,
           quantity: item.quantity,
