@@ -45,7 +45,7 @@ const securityMiddleware = (app) => {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         scriptSrc: ["'self'", "'unsafe-inline'", "https://apis.google.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        connectSrc: ["'self'", "https://*.firebaseio.com", "https://*.googleapis.com"],
+        connectSrc: ["'self'", "https://*.firebaseio.com", "https://*.googleapis.com", "https://yapi-backend.onrender.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
