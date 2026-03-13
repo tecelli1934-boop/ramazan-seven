@@ -190,9 +190,10 @@ const CheckoutPage = () => {
       };
 
       // Backend API'sine gönder
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://yapi-backend.onrender.com';
       const response = await axios.post(`${apiUrl}/api/orders`, orderData, {
-        withCredentials: true
+        withCredentials: true,
+        timeout: 60000 // 60 saniye bekle (Render'ın uyanması için)
       });
       
       if (response.data.status === 'success') {
@@ -223,7 +224,24 @@ const CheckoutPage = () => {
           <div className="bg-secondary-50 p-4 rounded text-left mb-6 text-sm">
             <p><strong>Teslimat:</strong> {formData.name}</p>
             <p><strong>E-posta:</strong> {formData.email}</p>
+            <p><strong>Ödeme Yöntemi:</strong> {formData.paymentMethod === 'bank_transfer' ? 'Banka Havalesi / EFT' : 'Kredi Kartı'}</p>
           </div>
+
+          {formData.paymentMethod === 'bank_transfer' && (
+            <div className="bg-primary-50 border border-primary-100 p-5 rounded-lg text-left mb-6">
+              <h3 className="text-primary-800 font-bold mb-3 flex items-center gap-2">
+                <CreditCard className="w-4 h-4" /> Ödeme Bilgileri
+              </h3>
+              <div className="space-y-2 text-sm text-secondary-700">
+                <p><strong>Firma Adı:</strong> RS YAPI VE İNŞAAT MALZEMELERİ</p>
+                <p><strong>Banka:</strong> [LÜTFEN BANKA ADINI BURAYA YAZINIZ]</p>
+                <div className="bg-white p-3 border border-primary-200 rounded font-mono text-xs break-all">
+                  <strong>IBAN:</strong> TR00 0000 0000 0000 0000 0000 00
+                </div>
+                <p className="text-[10px] text-secondary-500 mt-2 italic">* Lütfen açıklama kısmına sipariş numaranızı <strong>#{orderId?.slice(-6).toUpperCase()}</strong> yazmayı unutmayınız. Ödemeniz onaylandıktan sonra siparişiniz işleme alınacaktır.</p>
+              </div>
+            </div>
+          )}
           <Link to="/urunler" className="inline-block bg-primary-600 text-white px-6 py-3 rounded-md hover:bg-primary-700 transition">
             Alışverişe Devam Et
           </Link>
