@@ -25,7 +25,7 @@ const ShoppingListFAB = () => {
       {/* FAB Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+        className="fixed bottom-4 md:bottom-6 right-4 md:right-6 z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary-600 hover:bg-primary-700 text-white shadow-2xl flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
         aria-label="Alışveriş Listesi"
       >
         <ShoppingCart className="w-6 h-6" />
@@ -39,10 +39,10 @@ const ShoppingListFAB = () => {
       {/* Modal Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setIsOpen(false); }}
         >
-          <div className="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+          <div className="bg-white w-full max-w-md rounded-t-[32px] sm:rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-secondary-100">
               <div className="flex items-center gap-2">

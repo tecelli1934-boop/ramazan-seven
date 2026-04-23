@@ -45,7 +45,7 @@ const OrderManagement = () => {
   const getStatusConfig = (status) => {
     const configs = {
       pending: { label: 'Beklemede', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-      processing: { label: 'İşleniyor', color: 'bg-blue-100 text-blue-800', icon: Package },
+      processing: { label: 'İşleniyor', color: 'bg-orange-100 text-orange-800', icon: Package },
       shipped: { label: 'Kargoda', color: 'bg-purple-100 text-purple-800', icon: Truck },
       delivered: { label: 'Teslim Edildi', color: 'bg-green-100 text-green-800', icon: CheckCircle },
       cancelled: { label: 'İptal Edildi', color: 'bg-red-100 text-red-800', icon: XCircle }
@@ -147,7 +147,7 @@ const OrderManagement = () => {
                     <td className="px-6 py-4">
                       <div className="font-medium text-secondary-900">{order.customerInfo?.name}</div>
                       <div className="text-xs text-secondary-500">{order.customerInfo?.email}</div>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${order.customerType === 'guest' ? 'bg-orange-50 text-orange-600 border border-orange-100' : 'bg-blue-50 text-blue-600 border border-blue-100'}`}>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${order.customerType === 'guest' ? 'bg-secondary-100 text-secondary-500 border border-secondary-200' : 'bg-primary/5 text-primary border border-primary/20'}`}>
                         {order.customerType === 'guest' ? 'MİSAFİR' : 'ÜYE'}
                       </span>
                     </td>
@@ -170,7 +170,7 @@ const OrderManagement = () => {
                         </button>
                         
                         {order.status === 'pending' && (
-                          <button onClick={() => updateOrderStatus(order.id, 'processing')} className="p-1.5 hover:bg-blue-50 text-blue-600 rounded transition" title="İşleme Al">
+                          <button onClick={() => updateOrderStatus(order.id, 'processing')} className="p-1.5 hover:bg-orange-50 text-orange-600 rounded transition" title="İşleme Al">
                             <Package className="w-5 h-5" />
                           </button>
                         )}
@@ -232,6 +232,41 @@ const OrderManagement = () => {
                     {selectedOrder.status.toUpperCase()}
                   </div>
                   <p className="text-[10px] text-secondary-400 mt-2">ID: {selectedOrder.id}</p>
+
+                  {/* Kargo Bilgileri Düzenleme */}
+                  <div className="mt-6 pt-6 border-t border-secondary-100 space-y-4">
+                    <h4 className="text-xs font-bold text-secondary-400 uppercase tracking-widest">Kargo Bilgileri</h4>
+                    <div>
+                      <label className="block text-[10px] font-bold text-secondary-500 uppercase">Kargo Firması</label>
+                      <input 
+                        type="text" 
+                        value={selectedOrder.carrier || ''} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedOrder(prev => ({ ...prev, carrier: val }));
+                          const orderRef = doc(db, 'orders', selectedOrder.id);
+                          updateDoc(orderRef, { carrier: val });
+                        }}
+                        placeholder="Örn: Aras Kargo"
+                        className="w-full mt-1 px-3 py-1.5 text-sm border border-secondary-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary bg-white shadow-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-secondary-500 uppercase">Takip Numarası</label>
+                      <input 
+                        type="text" 
+                        value={selectedOrder.trackingNumber || ''} 
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSelectedOrder(prev => ({ ...prev, trackingNumber: val }));
+                          const orderRef = doc(db, 'orders', selectedOrder.id);
+                          updateDoc(orderRef, { trackingNumber: val });
+                        }}
+                        placeholder="Örn: 123456789"
+                        className="w-full mt-1 px-3 py-1.5 text-sm border border-secondary-200 rounded-lg focus:ring-1 focus:ring-primary focus:border-primary bg-white shadow-sm"
+                      />
+                    </div>
+                  </div>
                 </section>
               </div>
 

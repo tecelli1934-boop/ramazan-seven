@@ -48,12 +48,12 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 min-h-screen">
       <h1 className="text-3xl font-bold text-secondary-800 mb-8">Profilim</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Sol Menü */}
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* Sol Menü - Sticky */}
+        <div className="lg:col-span-1 sticky top-8">
           <div className="bg-white rounded-lg shadow-industrial p-6">
             <div className="text-center mb-6">
               {user?.picture ? (
@@ -70,28 +70,30 @@ const ProfilePage = () => {
             <nav className="space-y-2">
               <button 
                 onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-md transition text-left ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left font-black uppercase tracking-wider text-xs ${
                   activeTab === 'profile' 
-                    ? 'text-primary-600 bg-primary-50 font-medium' 
-                    : 'text-secondary-600 hover:bg-secondary-50'
+                    ? 'text-white bg-[#D35400] shadow-md' 
+                    : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <User className="w-4 h-4" />
                 Profil Bilgileri
               </button>
-              <Link 
-                to="/favoriler" 
-                className="flex items-center gap-3 px-4 py-2 text-secondary-600 hover:bg-secondary-50 rounded-md"
-              >
-                <Heart className="w-4 h-4" />
-                Favorilerim
-              </Link>
+              {user?.role === 'admin' && (
+                <Link 
+                  to="/favoriler" 
+                  className="flex items-center gap-3 px-4 py-2 text-secondary-600 hover:bg-secondary-50 rounded-md"
+                >
+                  <Heart className="w-4 h-4" />
+                  Favorilerim
+                </Link>
+              )}
               <button 
                 onClick={() => setActiveTab('address')}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-md transition text-left ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left font-black uppercase tracking-wider text-xs ${
                   activeTab === 'address' 
-                    ? 'text-primary-600 bg-primary-50 font-medium' 
-                    : 'text-secondary-600 hover:bg-secondary-50'
+                    ? 'text-white bg-[#D35400] shadow-md' 
+                    : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <MapPin className="w-4 h-4" />
@@ -99,26 +101,28 @@ const ProfilePage = () => {
               </button>
               <button 
                 onClick={() => setActiveTab('orders')}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-md transition text-left ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left font-black uppercase tracking-wider text-xs ${
                   activeTab === 'orders' 
-                    ? 'text-primary-600 bg-primary-50 font-medium' 
-                    : 'text-secondary-600 hover:bg-secondary-50'
+                    ? 'text-white bg-[#D35400] shadow-md' 
+                    : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
                 <ShoppingBag className="w-4 h-4" />
                 Siparişlerim
               </button>
-              <button 
-                onClick={() => setActiveTab('settings')}
-                className={`w-full flex items-center gap-3 px-4 py-2 rounded-md transition text-left ${
-                  activeTab === 'settings' 
-                    ? 'text-primary-600 bg-primary-50 font-medium' 
-                    : 'text-secondary-600 hover:bg-secondary-50'
-                }`}
-              >
-                <Settings className="w-4 h-4" />
-                Ayarlar
-              </button>
+              {user?.role === 'admin' && (
+                <button 
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left font-black uppercase tracking-wider text-xs ${
+                    activeTab === 'settings' 
+                      ? 'text-white bg-[#D35400] shadow-md' 
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  <Settings className="w-4 h-4" />
+                  Ayarlar
+                </button>
+              )}
               <button 
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-md transition text-left mt-4"
@@ -130,8 +134,8 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* İçerik */}
-        <div className="lg:col-span-2">
+        {/* İçerik - Kaydırılabilir */}
+        <div className="lg:col-span-2 overflow-y-auto max-h-[calc(100vh-160px)] pr-1">
           {activeTab === 'profile' && (
             <div className="bg-white rounded-lg shadow-industrial p-6 mb-6">
               <h2 className="text-xl font-semibold text-secondary-800 mb-6 flex items-center gap-2">
@@ -216,11 +220,11 @@ const ProfilePage = () => {
                 <button 
                   type="submit"
                   disabled={savingAddress}
-                  className={`w-full py-3 rounded-md font-bold text-white transition ${
-                    savingAddress ? 'bg-secondary-400 cursor-not-allowed' : 'bg-primary-600 hover:bg-primary-700'
+                  className={`w-full py-4 rounded-lg font-black text-white transition-all shadow-lg uppercase tracking-widest text-sm ${
+                    savingAddress ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#D35400] hover:bg-[#B13105]'
                   }`}
                 >
-                  {savingAddress ? 'Kaydediliyor...' : 'Adres Bilgilerini Kaydet'}
+                  {savingAddress ? 'KAYDEDİLİYOR...' : 'ADRES BİLGİLERİNİ KAYDET'}
                 </button>
               </form>
             </div>

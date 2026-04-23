@@ -112,7 +112,7 @@ const ProductManagement = () => {
   if (loading || categoriesLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -131,7 +131,7 @@ const ProductManagement = () => {
         <h2 className="text-2xl font-bold text-secondary-800">Ürün Yönetimi</h2>
         <button
           onClick={() => setShowAddForm(true)}
-          className="bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition flex items-center gap-2"
+          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-700 transition flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
           Yeni Ürün
@@ -196,7 +196,7 @@ const ProductManagement = () => {
                       type="file"
                       accept="image/*"
                       onChange={(e) => setImageFile(e.target.files[0])}
-                      className="w-full text-sm text-secondary-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+                      className="w-full text-sm text-secondary-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary/5 file:text-primary hover:file:bg-primary/10"
                     />
                     <p className="text-xs text-secondary-500 mt-1">Veya manuel URL girin:</p>
                     <input
@@ -315,7 +315,7 @@ const ProductManagement = () => {
               <button
                 type="submit"
                 disabled={uploading}
-                className={`bg-primary-600 text-white px-6 py-2 rounded-md transition font-bold ${
+                className={`bg-primary text-white px-6 py-2 rounded-md transition font-bold ${
                   uploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-primary-700'
                 }`}
               >
@@ -373,7 +373,7 @@ const ProductManagement = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
+                    <span className="px-2 inline-flex text-xs leading-5 font-bold rounded-full bg-primary/5 text-primary border border-primary/10">
                       {categories.find(c => c.id === product.category)?.name || product.category}
                     </span>
                   </td>
@@ -402,7 +402,7 @@ const ProductManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => handleEdit(product)}
-                      className="text-primary-600 hover:text-primary-900 mr-3"
+                      className="text-primary hover:text-primary/80 mr-3"
                       title="Düzenle"
                     >
                       <Edit className="w-4 h-4" />

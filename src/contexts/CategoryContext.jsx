@@ -29,7 +29,8 @@ export const CategoryProvider = ({ children }) => {
   useEffect(() => {
     const q = query(collection(db, 'categories'), orderBy('order', 'asc'));
     
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
+    // YUKARIYA: Kategori dinleyici (onSnapshot) sadece bir kez (mount anında) başlatılır.
+    const unsubscribe = onSnapshot(q, (snapshot) => {
       const cats = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -37,76 +38,20 @@ export const CategoryProvider = ({ children }) => {
 
       setCategories(cats);
       setLoading(false);
-      
-      // Duplikasyon temizliği tamamlandı, gerekirse manuel çağrılabilir.
-      if (cats.length > 0 && !loading) {
-        // cleanupDuplicates(); 
-      }
     }, (err) => {
-      console.error("Kategori çekme hatası:", err);
+      console.error("Kategori çekme hatası (onSnapshot):", err);
       setError(err.message);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
-
-  // KRİTİK: Mükerrer Kategorileri Temizleme (Migration)
-  const cleanupDuplicates = async () => {
-    if (categories.length === 0) return;
-    
-    console.log("Veritabanı temizliği başlatılıyor...");
-    const nameMap = {}; // name -> [ids]
-    
-    categories.forEach(cat => {
-      const name = cat.name.trim().toLowerCase();
-      if (!nameMap[name]) nameMap[name] = [];
-      nameMap[name].push(cat);
-    });
-
-    const batch = writeBatch(db);
-    let hasChanges = false;
-
-    for (const name in nameMap) {
-      const group = nameMap[name];
-      if (group.length > 1) {
-        // İlk bulunanı ana kategori kabul et, diğerlerini sil ve ürünlerini buna taşı
-        const primaryCat = group[0];
-        const duplicates = group.slice(1);
-
-        console.log(`'${primaryCat.name}' için ${duplicates.length} duplikasyon bulundu.`);
-
-        for (const duplicate of duplicates) {
-          // Bu kategoriye ait ürünleri bul
-          const productsRef = collection(db, 'products');
-          const productQ = query(productsRef, where('category', '==', duplicate.id));
-          const productSnap = await getDocs(productQ);
-
-          if (!productSnap.empty) {
-            productSnap.docs.forEach(pDoc => {
-              batch.update(pDoc.ref, { category: primaryCat.id });
-            });
-          }
-
-          // Mükerrer kategoriyi sil
-          batch.delete(doc(db, 'categories', duplicate.id));
-          hasChanges = true;
-        }
-      }
-    }
-
-    if (hasChanges) {
-      await batch.commit();
-      console.log("Temizlik tamamlandı. Mükerrer kayıtlar silindi ve ürünler taşındı.");
-      return true;
-    }
-    console.log("Mükerrer kayıt bulunamadı, veritabanı temiz.");
-    return false;
-  };
+  }, []); // Boş dizi: Sadece bir kez çalışır.
 
   // Yeni Kategori Ekleme
   const addCategory = async (categoryData) => {
     try {
+      console.log("Yeni kategori ekleme isteği:", categoryData);
+      
       // Slug oluştur
       const slug = categoryData.name
         .toLowerCase()
@@ -124,7 +69,9 @@ export const CategoryProvider = ({ children }) => {
         createdAt: new Date().toISOString()
       };
 
-      await addDoc(collection(db, 'categories'), finalData);
+      console.log("Firestore'a (categories) eklenecek veri:", finalData);
+      const docRef = await addDoc(collection(db, 'categories'), finalData);
+      console.log("Kategori başarıyla eklendi! Atanan ID:", docRef.id);
       return true;
     } catch (err) {
       console.error("Kategori ekleme hatası:", err);
@@ -168,6 +115,7 @@ export const CategoryProvider = ({ children }) => {
   // Kategori Silme
   const deleteCategory = async (id, reassignToId = 'diger') => {
     try {
+      console.log("Kategori silme isteği geldi. ID:", id, "ReassignTo:", reassignToId);
       // Bu kategoriye ait ürünleri bul ve başka bir kategoriye taşı
       const productsRef = collection(db, 'products');
       const q = query(productsRef, where('category', '==', id));
@@ -192,9 +140,11 @@ export const CategoryProvider = ({ children }) => {
       }
 
       // Kategoriyi sil
+      console.log("Firestore'dan silinme isteği gönderiliyor (Batch delete)...");
       batch.delete(doc(db, 'categories', id));
       
       await batch.commit();
+      console.log("Kategori başarıyla silindi (Firestore onayı)!");
       return true;
     } catch (err) {
       console.error("Kategori silme hatası:", err);
@@ -214,8 +164,7 @@ export const CategoryProvider = ({ children }) => {
     addCategory,
     updateCategory,
     deleteCategory,
-    getSubcategories,
-    cleanupDuplicates
+    getSubcategories
   };
 
   return (

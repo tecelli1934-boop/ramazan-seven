@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../../components/product/ProductCard';
 import { useProducts } from '../../contexts/ProductContext';
 import { useCategories } from '../../contexts/CategoryContext';
@@ -8,8 +9,18 @@ import SEO from '../../components/common/SEO';
 const AllProductsPage = () => {
   const { products, loading, error } = useProducts();
   const { categories, loading: categoriesLoading } = useCategories();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+
+  // URL'den gelen arama parametrelerini dinle
+  useEffect(() => {
+    const search = searchParams.get('search') || '';
+    const category = searchParams.get('category') || 'all';
+    
+    setSearchTerm(search);
+    setSelectedCategory(category);
+  }, [searchParams]);
 
   if (loading || categoriesLoading) {
     return (
@@ -31,8 +42,29 @@ const AllProductsPage = () => {
 
   // Filter products - Move after loading checks
   const filteredProducts = (products || []).filter(product => {
+    const searchLower = searchTerm.toLowerCase().trim();
+    const productCategory = categories.find(c => c.id === product.category);
+    
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    const matchesSearch = product.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Daha akıllı ve katı arama mantığı
+    let matchesSearch = true;
+    if (searchLower) {
+      const productName = product.name?.toLowerCase() || '';
+      const productDesc = product.description?.toLowerCase() || '';
+      const catName = productCategory?.name?.toLowerCase() || '';
+      
+      // Arama terimi; isimde, açıklamada veya kategori adında geçmeli
+      // AMA alakasız eşleşmeleri önlemek için kelime bazlı kontrolü güçlendiriyoruz
+      matchesSearch = 
+        productName.includes(searchLower) || 
+        productDesc.includes(searchLower) || 
+        catName.includes(searchLower);
+        
+      // Ekstra Katılık: Eğer arama çok kısaysa (örn: 2 harf), sadece kelime başı eşleşmelere bakılabilir.
+      // Şu an için her yerde geçmesi yeterli ama "vida" için "vidalı" gelebilir, "menteşe" gelmemeli.
+    }
+    
     return matchesCategory && matchesSearch;
   });
 

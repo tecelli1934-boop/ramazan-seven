@@ -56,13 +56,13 @@ const CartPage = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-secondary-800 mb-8">Sepetim</h1>
+      <h1 className="text-2xl md:text-3xl font-black text-secondary-800 mb-6 md:mb-8 uppercase tracking-tighter">Sepetim</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sepet Ürünleri */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow-industrial p-6">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-6">Sepet Ürünleri</h2>
+          <div className="bg-white rounded-2xl shadow-industrial p-4 sm:p-6">
+            <h2 className="text-lg font-black text-secondary-800 mb-5 uppercase tracking-tight">Sepet Ürünleri</h2>
             
             <div className="space-y-4">
               {cart.items.map((item) => (
@@ -159,8 +159,8 @@ const CartPage = () => {
 
         {/* Özet */}
         <div>
-          <div className="bg-white rounded-lg shadow-industrial p-6">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-6">Sipariş Özeti</h2>
+          <div className="bg-white rounded-2xl shadow-industrial p-4 sm:p-6">
+            <h2 className="text-lg font-black text-secondary-800 mb-5 uppercase tracking-tight text-center sm:text-left">Sipariş Özeti</h2>
             
             <div className="space-y-3 mb-6">
               <div className="flex justify-between">
@@ -196,7 +196,7 @@ const CartPage = () => {
 
             <Link 
               to="/checkout" 
-              className="w-full bg-primary-600 text-white py-3 rounded-md hover:bg-primary-700 transition text-center block"
+              className="w-full bg-primary hover:bg-primary-600 text-white py-4 md:py-3 rounded-xl font-black transition-all text-center block shadow-lg shadow-primary/20 uppercase tracking-widest text-sm md:text-base active:scale-95"
             >
               Ödemeye Geç
             </Link>

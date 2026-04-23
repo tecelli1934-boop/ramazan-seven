@@ -17,20 +17,29 @@ const CategoryManagement = () => {
   const resetForm = () => {
     setFormData({ name: '', parentId: '', isActive: true });
     setEditingId(null);
-    setShowForm(false);
     setConfirmingDelete(null);
+    // Formu kapatma - sadece sıfırla
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form gönderiliyor. Veri:", formData, "Düzenleme ID:", editingId);
     try {
       if (editingId) {
+        console.log("Güncelleme başlatılıyor (id:", editingId, ")");
         await updateCategory(editingId, formData);
+        alert("Kategori başarıyla güncellendi!");
       } else {
+        console.log("Ekleme başlatılıyor...");
         await addCategory(formData);
+        alert("Kategori başarıyla eklendi!");
       }
-      resetForm();
+      console.log("Form başarıyla işlendi, temizleniyor.");
+      // Formu sıfırlama ama kapatma
+      setFormData({ name: '', parentId: '', isActive: true });
+      setEditingId(null);
     } catch (err) {
+      console.error("Yönetim sayfasında hata yakalandı:", err);
       alert("Hata: " + err.message);
     }
   };
@@ -58,10 +67,13 @@ const CategoryManagement = () => {
   };
 
   const handleConfirmDelete = async (id) => {
+    console.log("Silme onaylandı. Silinecek ID:", id);
     try {
       await deleteCategory(id);
+      console.log("Silme işlemi context tarafından tamamlandı.");
       setConfirmingDelete(null);
     } catch (err) {
+      console.error("Silme işlemi sırasında hata:", err);
       alert("Silme hatası: " + err.message);
     }
   };
@@ -94,7 +106,7 @@ const CategoryManagement = () => {
           <p className="text-secondary-500 text-sm">Ürün kategorilerini ve hiyerarşiyi buradan yönetin.</p>
         </div>
         <button
-          onClick={() => { resetForm(); setShowForm(true); }}
+          onClick={() => setShowForm(true)}
           className="bg-primary-600 hover:bg-primary-700 text-white px-5 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md hover:shadow-lg font-semibold"
         >
           <Plus className="w-5 h-5" /> Yeni Kategori
@@ -153,17 +165,17 @@ const CategoryManagement = () => {
               </label>
             </div>
 
-            <div className="flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-secondary-100 mt-6">
+            <div className="flex justify-between items-center pt-4 border-t border-secondary-100 mt-6">
               <button
                 type="button"
-                onClick={resetForm}
-                className="order-2 md:order-1 px-5 py-2.5 border border-secondary-300 text-secondary-600 rounded-lg hover:bg-secondary-50 transition-all font-semibold flex items-center justify-center gap-2"
+                onClick={() => setShowForm(false)}
+                className="px-5 py-2.5 border border-secondary-300 text-secondary-600 rounded-lg hover:bg-secondary-50 transition-all font-semibold flex items-center gap-2"
               >
-                <XCircle className="w-5 h-5" /> Vazgeç
+                <XCircle className="w-5 h-5" /> Formu Kapat
               </button>
               <button
                 type="submit"
-                className="order-1 md:order-2 flex items-center justify-center gap-2 px-8 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 hover:shadow-lg active:scale-95 transition-all font-bold"
+                className="flex items-center justify-center gap-2 px-8 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 hover:shadow-lg active:scale-95 transition-all font-bold"
               >
                 <Save className="w-5 h-5" /> {editingId ? 'Değişiklikleri Kaydet' : 'Kategoriyi Oluştur'}
               </button>
@@ -246,7 +258,7 @@ const CategoryManagement = () => {
                                 </button>
                                 <button 
                                   onClick={() => handleEdit(mainCat)} 
-                                  className="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-all"
+                                  className="p-2 bg-primary/5 text-primary hover:bg-primary/10 rounded-md transition-all"
                                   title="Düzenle"
                                 >
                                   <Edit className="w-4 h-4" />
@@ -269,9 +281,9 @@ const CategoryManagement = () => {
                         const subConfirming = confirmingDelete === subCat.id;
                         return (
                           <tr key={subCat.id} className={`hover:bg-secondary-50 transition-colors ${subPassive ? 'bg-secondary-50/30' : 'bg-secondary-50/10'}`}>
-                            <td className="px-6 py-3 pl-12 border-l-2 border-primary-100">
+                            <td className="px-6 py-3 pl-12 border-l-2 border-primary">
                               <div className={`flex items-center gap-2 ${subPassive ? 'opacity-50 grayscale' : ''}`}>
-                                <span className="text-primary-300 font-bold">↳</span>
+                                <span className="text-primary font-bold">↳</span>
                                 <span className={`font-semibold ${subPassive ? 'text-secondary-400 line-through' : 'text-secondary-700'}`}>{subCat.name}</span>
                               </div>
                             </td>
@@ -302,7 +314,7 @@ const CategoryManagement = () => {
                                     >
                                       {subPassive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
                                     </button>
-                                    <button onClick={() => handleEdit(subCat)} className="p-1.5 text-blue-500"><Edit className="w-3.5 h-3.5" /></button>
+                                    <button onClick={() => handleEdit(subCat)} className="p-1.5 text-primary hover:bg-primary/5 rounded"><Edit className="w-3.5 h-3.5" /></button>
                                     <button onClick={() => setConfirmingDelete(subCat.id)} className="p-1.5 text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
                                   </>
                                 )}

@@ -1,8 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { collection, doc, setDoc, getDocs, updateDoc, deleteDoc, query, onSnapshot, writeBatch } from 'firebase/firestore';
+import { collection, doc, setDoc, updateDoc, deleteDoc, query, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
 import { products as mockProducts } from '../data/mockProducts';
-import { useCategories } from './CategoryContext';
 
 const ProductContext = createContext();
 
@@ -10,9 +9,8 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { categories, loading: categoriesLoading } = useCategories();
 
-  // Firestore'dan ürünleri dinle
+  // Firestore'dan ürünleri dinle (sadece bir kez başlatılır)
   useEffect(() => {
     setLoading(true);
     const q = query(collection(db, 'products'));
@@ -21,7 +19,6 @@ export const ProductProvider = ({ children }) => {
       try {
         if (querySnapshot.empty) {
           // Eğer Firestore tamamen boşsa (ilk kurulum), mock ürünleri Firestore'a yükle
-          console.log("Firestore boş, varsayılan ürünler yükleniyor...");
           const batchPromises = mockProducts.map(async (p) => {
             const docRef = doc(db, 'products', p.id.toString());
             const normalizedProduct = {
@@ -40,10 +37,10 @@ export const ProductProvider = ({ children }) => {
           // Yüklendikten sonra onSnapshot tekrar tetiklenecek
         } else {
           // Firestore'da veri varsa state'e al
-          const productsData = querySnapshot.docs.map(doc => ({
-            ...doc.data(),
-            id: doc.id,
-            _id: doc.id
+          const productsData = querySnapshot.docs.map(d => ({
+            ...d.data(),
+            id: d.id,
+            _id: d.id
           }));
           setProducts(productsData);
         }
@@ -60,68 +57,19 @@ export const ProductProvider = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  // KRİTİK: Ürün-Kategori eşleşmesini düzelten Migration
-  // Kategorisi hala 'slug' olan ürünleri bulup 'id' ile günceller
-  useEffect(() => {
-    const migrateCategories = async () => {
-      if (loading || categoriesLoading || products.length === 0 || categories.length === 0) return;
-
-      const productsToMigrate = products.filter(p => {
-        // Eğer kategori alanı bir slug ise (ID değildir)
-        // Basit bir kontrol: kategori ID'leri genelde uzun veya rastgele karakterler, 
-        // sluglar ise mockProducts'takilerdir veya bilinenler
-        const cat = categories.find(c => c.id === p.category);
-        if (!cat) {
-          // Eğer ID ile eşleşmiyorsa, slug ile eşleşen var mı bak
-          const matchingBySlug = categories.find(c => c.slug === p.category);
-          return !!matchingBySlug;
-        }
-        return false;
-      });
-
-      if (productsToMigrate.length > 0) {
-        console.log(`${productsToMigrate.length} ürün için kategori göçü başlatılıyor...`);
-        const batch = writeBatch(db);
-        let count = 0;
-
-        productsToMigrate.forEach(p => {
-          const matchingCat = categories.find(c => c.slug === p.category);
-          if (matchingCat) {
-            batch.update(doc(db, 'products', p.id), { category: matchingCat.id });
-            count++;
-          }
-        });
-
-        if (count > 0) {
-          try {
-            await batch.commit();
-            console.log(`${count} ürün başarıyla yeni kategori sistemine taşındı.`);
-          } catch (err) {
-            console.error("Migration hatası:", err);
-          }
-        }
-      }
-    };
-
-    migrateCategories();
-  }, [products, categories, loading, categoriesLoading]);
+  }, []); // Boş dizi: Sadece bir kez çalışır
 
   // Yeni ürün ekleme (Firestore'a)
   const addProduct = async (productData) => {
     try {
-      // Rastgele bir ID oluştur
       const newId = Date.now().toString();
       const newProduct = {
         ...productData,
         id: newId,
         _id: newId,
         createdAt: new Date().toISOString(),
-        // Eğer satış fiyatı verilmemişse normal price'ı satış fiyatı say
         salePrice: productData.salePrice || productData.price || 0,
       };
-
       await setDoc(doc(db, 'products', newId), newProduct);
       return newProduct;
     } catch (err) {
@@ -135,12 +83,10 @@ export const ProductProvider = ({ children }) => {
     try {
       const idStr = id?.toString();
       const productRef = doc(db, 'products', idStr);
-      
       const updateData = {
         ...productData,
         updatedAt: new Date().toISOString()
       };
-      
       await updateDoc(productRef, updateData);
       return { id: idStr, ...updateData };
     } catch (err) {
@@ -160,10 +106,8 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
-  // Geriye dönük uyumluluk için fetchProducts manuel çağırma (onSnapshot yapıyor ama eski kodlar çağırabilir)
-  const fetchProducts = () => {
-    // onSnapshot zaten hallediyor, boş fonksiyon bırakıyoruz ki eski componentler hata atmasın
-  };
+  // Geriye dönük uyumluluk
+  const fetchProducts = () => {};
 
   return (
     <ProductContext.Provider

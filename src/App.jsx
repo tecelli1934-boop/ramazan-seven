@@ -21,6 +21,7 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import ProfilePage from './pages/shop/ProfilePage';
 import FavoritesPage from './pages/shop/FavoritesPage';
+import ProjectsPage from './pages/shop/ProjectsPage';
 import CheckoutPage from './pages/shop/CheckoutPage';
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -29,7 +30,9 @@ import CategoryManagement from './pages/admin/CategoryManagement';
 import OrderManagement from './pages/admin/OrderManagement';
 import AdminSettings from './pages/admin/AdminSettings';
 import PageManagement from './pages/admin/PageManagement';
+import AdminProfile from './pages/admin/AdminProfile';
 import { seedSiteContent } from './utils/seedSiteContent';
+import AdminRoute from './components/common/AdminRoute';
 import { auth, db, messaging, getToken, onMessage } from './firebase';
 import axios from 'axios';
 import { useEffect } from 'react';
@@ -43,6 +46,10 @@ import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import SalesContract from './pages/legal/SalesContract';
 import ReturnPolicy from './pages/legal/ReturnPolicy';
 import ContactPage from './pages/shop/ContactPage';
+import OrderTrackingPage from './pages/shop/OrderTrackingPage';
+import AboutPage from './pages/shop/AboutPage';
+import WhatsAppButton from './components/ui/WhatsAppButton';
+import ChatBot from './components/ui/ChatBot';
 
 function App() {
   useEffect(() => {
@@ -75,26 +82,34 @@ function App() {
                     <Route path="/sifremi-unuttum" element={<ForgotPasswordPage />} />
                     <Route path="/sifre-sifirla/:token" element={<ResetPasswordPage />} />
                     <Route path="/profil" element={<ProfilePage />} />
+                    <Route path="/koleksiyon" element={<ProjectsPage />} />
                     <Route path="/favoriler" element={<FavoritesPage />} />
                     <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/siparis-takip" element={<OrderTrackingPage />} />
+                    <Route path="/bizi-taniyin" element={<AboutPage />} />
                     <Route path="/iletisim" element={<ContactPage />} />
                     <Route path="/gizlilik-politikasi" element={<PrivacyPolicy />} />
                     <Route path="/mesafeli-satis-sozlesmesi" element={<SalesContract />} />
                     <Route path="/iade-kosullari" element={<ReturnPolicy />} />
 
                     {/* Admin Routes */}
-                    <Route path="/admin" element={<AdminLayout />}>
-                      <Route index element={<Dashboard />} />
-                      <Route path="urunler" element={<ProductManagement />} />
-                      <Route path="kategoriler" element={<CategoryManagement />} />
-                      <Route path="siparisler" element={<OrderManagement />} />
-                      <Route path="sayfalar" element={<PageManagement />} />
-                      <Route path="ayarlar" element={<AdminSettings />} />
+                    <Route element={<AdminRoute />}>
+                      <Route path="/admin" element={<AdminLayout />}>
+                        <Route index element={<Dashboard />} />
+                        <Route path="urunler" element={<ProductManagement />} />
+                        <Route path="kategoriler" element={<CategoryManagement />} />
+                        <Route path="siparisler" element={<OrderManagement />} />
+                        <Route path="sayfalar" element={<PageManagement />} />
+                        <Route path="ayarlar" element={<AdminSettings />} />
+                        <Route path="profil" element={<AdminProfile />} />
+                      </Route>
                     </Route>
                   </Routes>
                         </main>
                         <Footer />
                         <ShoppingListFAB />
+                        <WhatsAppButton />
+                        <ChatBot />
                       </div>
                     </ShoppingListProvider>
                   </FavoritesProvider>

@@ -35,7 +35,7 @@ const CreditCardForm = ({ onSubmit, amount, isSubmitting, disabled }) => {
       .replace(/[^0-9]/g, '')
       .replace(/^([2-9])$/g, '0$1')
       .replace(/^(1[3-9])$/g, '0$1')
-      .replace(/^([0-1][0-2])([0-9]{2,4})/, '$1/$2')
+      .replace(/^(0[1-9]|1[0-2])([0-9]{1,2})/, '$1/$2')
       .substring(0, 5);
   };
 

@@ -272,13 +272,13 @@ const CheckoutPage = () => {
         </Link>
       </div>
 
-      <h1 className="text-3xl font-bold text-secondary-800 mb-8">Ödeme Bilgileri</h1>
+      <h1 className="text-2xl md:text-3xl font-black text-secondary-800 mb-6 md:mb-8 uppercase tracking-tighter">Ödeme Bilgileri</h1>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sol Kolon: Form */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-lg shadow-industrial p-6">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-6">Teslimat & İletişim</h2>
+          <div className="bg-white rounded-2xl shadow-industrial p-4 sm:p-6">
+            <h2 className="text-lg font-black text-secondary-800 mb-5 uppercase tracking-tight">Teslimat & İletişim</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -340,8 +340,8 @@ const CheckoutPage = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-industrial p-6">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-6 flex items-center gap-2">
+          <div className="bg-white rounded-2xl shadow-industrial p-4 sm:p-6">
+            <h2 className="text-lg font-black text-secondary-800 mb-5 flex items-center gap-2 uppercase tracking-tight">
               <CreditCard className="w-5 h-5 text-primary-600" /> Ödeme Yöntemi
             </h2>
             <div className="space-y-3">
@@ -378,8 +378,8 @@ const CheckoutPage = () => {
 
         {/* Sağ Kolon: Özet */}
         <div className="space-y-6">
-          <div className="bg-white rounded-lg shadow-industrial p-6 sticky top-24">
-            <h2 className="text-xl font-semibold text-secondary-800 mb-6">Sipariş Özeti</h2>
+          <div className="bg-white rounded-2xl shadow-industrial p-4 sm:p-6 sticky top-24">
+            <h2 className="text-lg font-black text-secondary-800 mb-5 uppercase tracking-tight">Sipariş Özeti</h2>
             
             <div className="max-h-60 overflow-y-auto mb-6 pr-2 space-y-4">
               {cart.items.map((item) => (

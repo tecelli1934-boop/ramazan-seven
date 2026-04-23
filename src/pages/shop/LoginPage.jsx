@@ -56,12 +56,12 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-secondary-900">
-            Hesabınıza Giriş Yapın
+          <h2 className="mt-6 text-center text-4xl font-black text-[#2B2B2B] uppercase tracking-tight">
+            GİRİŞ YAPIN
           </h2>
-          <p className="mt-2 text-center text-sm text-secondary-600">
+          <p className="mt-2 text-center text-sm text-gray-600 font-bold">
             veya{' '}
-            <Link to="/kayit" className="font-medium text-primary-600 hover:text-primary-500">
+            <Link to="/kayit" className="font-black text-[#D35400] hover:text-[#B13105] uppercase tracking-wider">
               yeni hesap oluşturun
             </Link>
           </p>
@@ -159,16 +159,14 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50"
+              className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-black rounded-lg text-white bg-[#D35400] hover:bg-[#B13105] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D35400] transition-all shadow-lg uppercase tracking-widest disabled:opacity-50"
             >
               {isLoading ? 'Giriş Yapılıyor...' : 'Giriş Yap'}
             </button>
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-secondary-500">
-              Test hesabı: <span className="font-mono font-medium">admin@test.com</span> / <span className="font-mono font-medium">admin123</span>
-            </p>
+
           </div>
         </form>
 

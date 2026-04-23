@@ -44,9 +44,15 @@ const Dashboard = () => {
   const [editingStock, setEditingStock] = useState(null);
   const [newStock, setNewStock] = useState('');
   const [selectedCard, setSelectedCard] = useState('satış');
+  const [isMounted, setIsMounted] = useState(false);
+  const [timeRange, setTimeRange] = useState('30G');
 
-  // Grafik Renkleri
-  const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Grafik Renkleri - Yapibahce Orange Temalı
+  const COLORS = ['#f15a24', '#2b2b2b', '#ff9f43', '#10b981', '#ff4d4d', '#7c2d12'];
 
   // Siparişleri Firestore'dan gerçek zamanlı çek
   useEffect(() => {
@@ -69,9 +75,14 @@ const Dashboard = () => {
   // Grafik Verilerini Hazırla (useMemo ile performans optimizasyonu)
   const salesChartData = useMemo(() => {
     const dailyDataMap = {};
+    const now = new Date();
     
-    // Son 7 günü 0 verisiyle başlat (Tarihsel sıralama garantisi)
-    for (let i = 6; i >= 0; i--) {
+    let daysToLookBack = 7;
+    if (timeRange === '30G') daysToLookBack = 30;
+    if (timeRange === 'TÜMÜ') daysToLookBack = 365;
+
+    // Haritayı 0 verisiyle doldur
+    for (let i = daysToLookBack - 1; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
@@ -79,25 +90,43 @@ const Dashboard = () => {
     }
 
     orders.filter(o => o.status !== 'cancelled').forEach(order => {
-      const date = order.createdAt?.toDate ? 
-        order.createdAt.toDate().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) : 
-        new Date(order.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+      const dateObj = order.createdAt?.toDate ? order.createdAt.toDate() : new Date(order.createdAt);
+      const dateStr = dateObj.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
       
-      if (dailyDataMap[date]) {
-        dailyDataMap[date].satış += order.total || 0;
-        dailyDataMap[date].sipariş += 1;
+      // TÜMÜ seçiliyse ve haritada yoksa bile ekle (çok eski siparişler için)
+      if (timeRange === 'TÜMÜ' && !dailyDataMap[dateStr]) {
+         dailyDataMap[dateStr] = { date: dateStr, satış: 0, kar: 0, sipariş: 0 };
+      }
+
+      if (dailyDataMap[dateStr]) {
+        dailyDataMap[dateStr].satış += order.total || 0;
+        dailyDataMap[dateStr].sipariş += 1;
         
         // Tahmini kar hesapla
         const cost = order.items.reduce((sum, item) => {
           const product = products.find(p => p.id === item.id || p._id === item.id);
           return sum + ((product?.basePrice || item.price * 0.7) * item.quantity);
         }, 0);
-        dailyDataMap[date].kar += (order.total - cost);
+        dailyDataMap[dateStr].kar += (order.total - cost);
       }
     });
 
-    return Object.values(dailyDataMap);
-  }, [orders, products]);
+    // Sadece değeri olanları veya son X günü döndür
+    let result = Object.values(dailyDataMap);
+    
+    // TÜMÜ seçiliyse ve çok fazla gün varsa, sadece sipariş olan günleri göster
+    if (timeRange === 'TÜMÜ') {
+        result = result.filter(r => r.satış > 0 || r.sipariş > 0);
+        // Tarihe göre sırala
+        result.sort((a, b) => {
+            const dateA = new Date(a.date + ' ' + now.getFullYear());
+            const dateB = new Date(b.date + ' ' + now.getFullYear());
+            return dateA - dateB;
+        });
+    }
+
+    return result;
+  }, [orders, products, timeRange]);
 
   const categoryChartData = useMemo(() => {
     return categories.map(cat => ({
@@ -132,8 +161,8 @@ const Dashboard = () => {
   if (productsLoading || ordersLoading) {
     return (
       <div className="flex flex-col justify-center items-center h-64 gap-4">
-        <Loader2 className="w-8 h-8 text-primary-600 animate-spin" />
-        <p className="text-secondary-600">Veriler yükleniyor...</p>
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <p className="text-secondary-600 font-bold uppercase tracking-widest text-xs">Veriler yükleniyor...</p>
       </div>
     );
   }
@@ -154,12 +183,12 @@ const Dashboard = () => {
   const totalStockValue = products.reduce((sum, p) => sum + (p.stock * (p.basePrice || p.price * 0.7)), 0);
 
   const cards = [
-    { id: 'ürünler', title: 'Toplam Ürün', value: products.length, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
+    { id: 'ürünler', title: 'Toplam Ürün', value: products.length, icon: Package, color: 'text-primary', bg: 'bg-primary/5', border: 'border-primary/20' },
     { id: 'siparişler', title: 'Toplam Sipariş', value: totalOrders, icon: ShoppingCart, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
-    { id: 'satış', title: 'Toplam Satış', value: `₺${totalSales.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: DollarSign, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-    { id: 'kar', title: 'Tahmini Kar', value: `₺${totalProfit.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: TrendingUp, color: 'text-pink-600', bg: 'bg-pink-50', border: 'border-pink-100' },
-    { id: 'stok', title: 'Stok Değeri', value: `₺${totalStockValue.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: Package, color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-100' },
-    { id: 'bekleyen', title: 'Bekleyen', value: pendingOrders, icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50', border: 'border-yellow-100' }
+    { id: 'satış', title: 'Toplam Satış', value: `₺${totalSales.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: DollarSign, color: 'text-orange-600', bg: 'bg-orange-50', border: 'border-orange-100' },
+    { id: 'kar', title: 'Tahmini Kar', value: `₺${totalProfit.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: TrendingUp, color: 'text-primary', bg: 'bg-primary/5', border: 'border-primary/20' },
+    { id: 'stok', title: 'Stok Değeri', value: `₺${totalStockValue.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}`, icon: Package, color: 'text-secondary-800', bg: 'bg-secondary-50', border: 'border-secondary-100' },
+    { id: 'bekleyen', title: 'Bekleyen', value: pendingOrders, icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-100' }
   ];
 
   const lowStockProducts = products.filter(p => p.stock < 10);
@@ -216,8 +245,16 @@ const Dashboard = () => {
             {selectedCard} Analizi
           </h3>
           <div className="flex gap-2">
-            {['7G', '30G', '12A'].map(t => (
-              <button key={t} className="px-3 py-1 text-[10px] font-black rounded-lg border border-secondary-200 text-secondary-600 hover:bg-secondary-50">
+            {['7G', '30G', 'TÜMÜ'].map(t => (
+              <button 
+                key={t} 
+                onClick={() => setTimeRange(t)}
+                className={`px-3 py-1 text-[10px] font-black rounded-lg border transition-colors ${
+                  timeRange === t 
+                  ? 'bg-primary border-primary text-white' 
+                  : 'border-secondary-200 text-secondary-600 hover:bg-secondary-50'
+                }`}
+              >
                 {t}
               </button>
             ))}
@@ -225,94 +262,100 @@ const Dashboard = () => {
         </div>
 
         <div className="h-[350px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            {selectedCard === 'satış' || selectedCard === 'kar' ? (
-              <AreaChart data={salesChartData}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={selectedCard === 'satış' ? '#6366f1' : '#10b981'} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={selectedCard === 'satış' ? '#6366f1' : '#10b981'} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#94a3b8', fontSize: 12}}
-                  tickFormatter={(val) => `₺${val.toLocaleString()}`}
-                />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val) => [`₺${val.toLocaleString()}`, selectedCard === 'satış' ? 'Günlük Gelir' : 'Günlük Kar']}
-                />
-                <Area 
-                  type="monotone" 
-                  dataKey={selectedCard} 
-                  stroke={selectedCard === 'satış' ? '#6366f1' : '#10b981'} 
-                  fillOpacity={1} 
-                  fill="url(#colorValue)" 
-                  strokeWidth={4}
-                  animationDuration={1500}
-                />
-              </AreaChart>
-            ) : selectedCard === 'siparişler' ? (
-              <BarChart data={salesChartData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                <Tooltip 
-                  cursor={{fill: '#f8fafc'}}
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val) => [`${val} Adet`, 'Sipariş Sayısı']}
-                />
-                <Bar dataKey="sipariş" fill="#10b981" radius={[6, 6, 0, 0]} barSize={40} animationDuration={1500} />
-              </BarChart>
-            ) : selectedCard === 'ürünler' || selectedCard === 'stok' ? (
-              <BarChart data={selectedCard === 'ürünler' ? categoryChartData : categoryStockValueData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} dy={10} />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{fill: '#94a3b8', fontSize: 12}}
-                  tickFormatter={(val) => selectedCard === 'stok' ? `₺${(val/1000).toFixed(0)}k` : val}
-                />
-                <Tooltip 
-                  cursor={{fill: '#f8fafc'}}
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val) => [selectedCard === 'stok' ? `₺${val.toLocaleString()}` : `${val} Ürün`, selectedCard === 'stok' ? 'Stok Değeri' : 'Ürün Sayısı']}
-                />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50} animationDuration={1500}>
-                  {(selectedCard === 'ürünler' ? categoryChartData : categoryStockValueData).map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            ) : (
-                <PieChart>
-                  <Pie
-                    data={orderStatusData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={80}
-                    outerRadius={120}
-                    paddingAngle={5}
-                    dataKey="value"
-                    animationDuration={1500}
-                  >
-                    {orderStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
+          {isMounted ? (
+            <ResponsiveContainer width="100%" height="100%">
+              {selectedCard === 'satış' || selectedCard === 'kar' ? (
+                <AreaChart data={salesChartData}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#f15a24" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#f15a24" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#94a3b8', fontSize: 12}}
+                    tickFormatter={(val) => `₺${val.toLocaleString()}`}
+                  />
                   <Tooltip 
                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                    formatter={(val, name) => [`${val} Sipariş`, name]}
+                    formatter={(val) => [`₺${val.toLocaleString()}`, selectedCard === 'satış' ? 'Günlük Gelir' : 'Günlük Kar']}
                   />
-                  <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-                </PieChart>
-            )}
-          </ResponsiveContainer>
+                  <Area 
+                    type="monotone" 
+                    dataKey={selectedCard} 
+                    stroke="#f15a24" 
+                    fillOpacity={1} 
+                    fill="url(#colorValue)" 
+                    strokeWidth={4}
+                    animationDuration={1500}
+                  />
+                </AreaChart>
+              ) : selectedCard === 'siparişler' ? (
+                <BarChart data={salesChartData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                  <Tooltip 
+                    cursor={{fill: '#f8fafc'}}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val) => [`${val} Adet`, 'Sipariş Sayısı']}
+                  />
+                  <Bar dataKey="sipariş" fill="#10b981" radius={[6, 6, 0, 0]} barSize={40} animationDuration={1500} />
+                </BarChart>
+              ) : selectedCard === 'ürünler' || selectedCard === 'stok' ? (
+                <BarChart data={selectedCard === 'ürünler' ? categoryChartData : categoryStockValueData}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10}} dy={10} />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#94a3b8', fontSize: 12}}
+                    tickFormatter={(val) => selectedCard === 'stok' ? `₺${(val/1000).toFixed(0)}k` : val}
+                  />
+                  <Tooltip 
+                    cursor={{fill: '#f8fafc'}}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val) => [selectedCard === 'stok' ? `₺${val.toLocaleString()}` : `${val} Ürün`, selectedCard === 'stok' ? 'Stok Değeri' : 'Ürün Sayısı']}
+                  />
+                  <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={50} animationDuration={1500}>
+                    {(selectedCard === 'ürünler' ? categoryChartData : categoryStockValueData).map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              ) : (
+                  <PieChart>
+                    <Pie
+                      data={orderStatusData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={80}
+                      outerRadius={120}
+                      paddingAngle={5}
+                      dataKey="value"
+                      animationDuration={1500}
+                    >
+                      {orderStatusData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                      formatter={(val, name) => [`${val} Sipariş`, name]}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                  </PieChart>
+              )}
+            </ResponsiveContainer>
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Loader2 className="w-6 h-6 text-primary animate-spin opacity-20" />
+            </div>
+          )}
         </div>
       </div>
 

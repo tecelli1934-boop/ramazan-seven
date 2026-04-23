@@ -2,7 +2,6 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: "AIzaSyA3NQsRHqBTiResAy70I15HG3BjjWRuuhI",
@@ -19,8 +18,11 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-export const messaging = getMessaging(app);
 export const googleProvider = new GoogleAuthProvider();
 
-export { getToken, onMessage };
+// messaging kaldırıldı - Service Worker gerektiriyor, hata verebiliyor
+export const messaging = null;
+export const getToken = null;
+export const onMessage = null;
+
 export default app;

@@ -90,12 +90,16 @@ router.patch('/sifre-guncelle', authController.protect, validateUpdatePassword, 
 // Save FCM token for notifications
 router.post('/fcm-token', authController.protect, authController.updateFCMToken);
 
-// Admin login (backward compatibility)
+// Admin login (Environment Variable ile)
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+  
+  // Environment variables ile admin kontrolü
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@example.com';
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+  
+  if (email === adminEmail && password === adminPassword) {
     const payload = { email, role: 'admin' };
-    // Token süresini 7 gün yapalım
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' });
     res.json({ token, role: 'admin', message: 'Giriş başarılı' });
   } else {
