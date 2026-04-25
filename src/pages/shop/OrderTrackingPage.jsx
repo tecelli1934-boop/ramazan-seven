@@ -3,6 +3,8 @@ import { useOrders } from '../../contexts/OrderContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Search, Package, Truck, CheckCircle, Clock, XCircle, AlertCircle, ChevronRight, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { db } from '../../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 
 const OrderTrackingPage = () => {
   const [orderId, setOrderId] = useState('');
@@ -11,6 +13,20 @@ const OrderTrackingPage = () => {
   const [error, setError] = useState(null);
   const { orders, loading: ordersLoading } = useOrders();
   const { user } = useAuth();
+  const [contactInfo, setContactInfo] = useState({ phone: '+90 555 555 55 55', mobile: '+90 555 555 55 55' });
+
+  useEffect(() => {
+    const docRef = doc(db, 'site_content', 'contact');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setContactInfo(docSnap.data());
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const phoneNumber = contactInfo.mobile || contactInfo.phone || '+905555555555';
+  const whatsappNumber = phoneNumber.replace(/[^0-9]/g, '');
 
   // User's own orders if logged in
   const userOrders = user ? orders.filter(order => order.customerInfo?.email === user.email) : [];
@@ -186,7 +202,7 @@ const OrderTrackingPage = () => {
           <h3 className="text-xl font-black text-secondary-900 uppercase tracking-tight mb-2">Desteğe mi İhtiyacınız Var?</h3>
           <p className="text-gray-500 mb-6 font-medium">Siparişinizle ilgili bir sorun mu yaşıyorsunuz? WhatsApp destek hattımızdan bize ulaşabilirsiniz.</p>
           <a 
-            href="https://wa.me/905555555555" 
+            href={`https://wa.me/${whatsappNumber}`} 
             target="_blank" 
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-[#25D366] text-white px-8 py-3 rounded-xl font-black text-sm uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-green-200"

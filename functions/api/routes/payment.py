@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from ...services.payment_service import payment_service
+from services.payment_service import payment_service
 
 router = APIRouter()
 

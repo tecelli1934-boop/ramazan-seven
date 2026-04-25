@@ -75,7 +75,7 @@ const ProjectsPage = () => {
     : projects.filter(p => p.category === activeCategory);
 
   return (
-    <div className="bg-[#0d1117] min-h-screen pb-20">
+    <div className="bg-[#151a23] min-h-screen pb-20">
       <SEO 
         title="Koleksiyon ve Projelerimiz" 
         description="SVN Profil Armatür tarafından gerçekleştirilen seçkin profil, cephe ve armatür projeleri."
@@ -175,7 +175,7 @@ const ProjectsPage = () => {
                   {project.features.map((feature, idx) => (
                     <span 
                       key={idx} 
-                      className="px-2.5 py-1 rounded bg-[#0d1117] border border-[#21262d] text-[#e6edf3] text-[11px] font-medium"
+                      className="px-2.5 py-1 rounded bg-[#151a23] border border-[#21262d] text-[#e6edf3] text-[11px] font-medium"
                     >
                       {feature}
                     </span>

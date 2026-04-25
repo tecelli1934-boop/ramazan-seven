@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
-from ...models.schemas import Product, ProductCreate
-from ...services.firebase_service import db
+from models.schemas import Product, ProductCreate
+from services.firebase_service import db
 from datetime import datetime
 
 router = APIRouter()

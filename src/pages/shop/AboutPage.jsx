@@ -1,10 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { db } from '../../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
 import SEO from '../../components/common/SEO';
 import { ShieldCheck, Target, Users, Award, CheckCircle2, Building2 } from 'lucide-react';
 import slide1 from '../../assets/hero/slide1.png';
 import { Link } from 'react-router-dom';
 
 const AboutPage = () => {
+  const [aboutData, setAboutData] = useState({
+    title: 'YAPIDA TECRÜBE VE GÜVEN',
+    content: 'SVN PROFİL ARMATÜR olarak, yapı malzemeleri sektöründe kaliteli ve uzun ömürlü çözümler sunmak amacıyla yola çıktık. Bugün gelinen noktada, binlerce konut ve iş merkezi projesinde imzamızın bulunmasının gururunu yaşıyoruz.\n\nÖzellikle profil grupları ve armatür çözümlerinde uzmanlaşan ekibimiz, modern tasarım anlayışını yüksek mühendislik kalitesiyle birleştirerek projelerinize değer katmaktadır.'
+  });
+
+  useEffect(() => {
+    const docRef = doc(db, 'site_content', 'about');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setAboutData({
+          title: data.title || 'YAPIDA TECRÜBE VE GÜVEN',
+          content: data.content || ''
+        });
+      }
+    });
+    return () => unsubscribe();
+  }, []);
   const stats = [
     { label: 'Yıllık Tecrübe', value: '30+', icon: Award },
     { label: 'Mutlu Müşteri', value: '5000+', icon: Users },
@@ -47,7 +67,9 @@ const AboutPage = () => {
             KURUMSAL PROFiLİMİZ
           </span>
           <h1 className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter italic leading-tight">
-            YAPIDA <span className="text-primary not-italic">TECRÜBE VE GÜVEN</span>
+            {aboutData.title.split(' ').map((word, i) => (
+              i === 1 ? <span key={i} className="text-primary not-italic">{word} </span> : word + ' '
+            ))}
           </h1>
           <p className="text-gray-300 max-w-2xl mx-auto font-medium text-lg">
             Sektördeki 30 yılı aşkın deneyimimizle, estetiği ve dayanıklılığı bir araya getiren çözümler üretiyoruz.
@@ -66,12 +88,9 @@ const AboutPage = () => {
                   Hakkımızda
                 </h2>
                 <div className="w-20 h-2 bg-primary rounded-full mb-8"></div>
-                <p className="text-gray-600 leading-relaxed text-lg">
-                  SVN PROFİL ARMATÜR olarak, yapı malzemeleri sektöründe kaliteli ve uzun ömürlü çözümler sunmak amacıyla yola çıktık. Bugün gelinen noktada, binlerce konut ve iş merkezi projesinde imzamızın bulunmasının gururunu yaşıyoruz.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  Özellikle profil grupları ve armatür çözümlerinde uzmanlaşan ekibimiz, modern tasarım anlayışını yüksek mühendislik kalitesiyle birleştirerek projelerinize değer katmaktadır.
-                </p>
+                <div className="text-gray-600 leading-relaxed text-lg space-y-4 whitespace-pre-wrap">
+                  {aboutData.content || 'SVN PROFİL ARMATÜR olarak, yapı malzemeleri sektöründe kaliteli ve uzun ömürlü çözümler sunmak amacıyla yola çıktık.'}
+                </div>
                 <div className="grid grid-cols-2 gap-4 sm:gap-6 pt-6">
                   {stats.map((stat, idx) => (
                     <div key={idx} className="p-4 sm:p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-primary/20 transition-colors group">

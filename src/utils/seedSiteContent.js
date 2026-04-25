@@ -19,6 +19,11 @@ export const seedSiteContent = async () => {
       content: `İade süresi ürünün teslimatından itibaren 14 gündür. İade edilecek ürünün orijinal ambalajı hasar görmemiş olmalıdır.`
     },
     {
+      id: 'about',
+      title: 'YAPIDA TECRÜBE VE GÜVEN',
+      content: `SVN PROFİL ARMATÜR olarak, yapı malzemeleri sektöründe kaliteli ve uzun ömürlü çözümler sunmak amacıyla yola çıktık. Bugün gelinen noktada, binlerce konut ve iş merkezi projesinde imzamızın bulunmasının gururunu yaşıyoruz.\n\nÖzellikle profil grupları ve armatür çözümlerinde uzmanlaşan ekibimiz, modern tasarım anlayışını yüksek mühendislik kalitesiyle birleştirerek projelerinize değer katmaktadır.`
+    },
+    {
       id: 'contact',
       title: 'İletişim Bilgileri',
       address: 'Ankara Sanayi Sitesi, No: 123 Ankara',

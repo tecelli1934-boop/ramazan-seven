@@ -6,6 +6,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useFavorites } from '../../contexts/FavoritesContext';
 import { useCategories } from '../../contexts/CategoryContext';
 import { useProducts } from '../../contexts/ProductContext';
+import { db } from '../../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import logo from '../../assets/logo.png';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +23,20 @@ const Navbar = () => {
   const { categories, getSubcategories } = useCategories();
   const { products } = useProducts();
   const navigate = useNavigate();
+  const [contactInfo, setContactInfo] = useState({ phone: '+90 555 555 55 55', mobile: '+90 555 555 55 55' });
+
+  useEffect(() => {
+    const docRef = doc(db, 'site_content', 'contact');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setContactInfo(docSnap.data());
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+  
+  const phoneNumber = contactInfo.mobile || contactInfo.phone || '+905555555555';
+  const whatsappNumber = phoneNumber.replace(/[^0-9]/g, '');
 
   // Arama önerileri filtreleme - Optimize with useMemo
   const suggestions = React.useMemo(() => {
@@ -71,14 +88,14 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#0d1117] border-b border-[#2281BB]/20 sticky top-0 z-50">
+    <nav className="bg-[#151a23] border-b border-[#2281BB]/20 sticky top-0 z-50">
       {/* Top Bar */}
       <div className="bg-primary text-white py-2 text-[12px] font-bold">
-        <div className="container mx-auto px-4 flex justify-between items-center">
+        <div className="container mx-auto px-4 flex justify-between items-center" data-v="2">
           <div className="flex items-center gap-6">
-            <a href="tel:+905555555555" className="flex items-center gap-1.5 hover:text-white/80 transition">
+            <a href={`tel:${phoneNumber}`} className="flex items-center gap-1.5 hover:text-white/80 transition">
               <Phone className="w-3.5 h-3.5" />
-              <span>+90 555 555 55 55</span>
+              <span>{phoneNumber}</span>
             </a>
             <span className="hidden md:block opacity-60">|</span>
             <Link to="/iletisim" className="hidden md:block hover:text-white/80 transition">Destek Merkezi</Link>
@@ -87,7 +104,7 @@ const Navbar = () => {
             <div className="hidden sm:flex items-center gap-3">
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><Instagram className="w-4 h-4" /></a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><Facebook className="w-4 h-4" /></a>
-              <a href="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><MessageCircle className="w-4 h-4" /></a>
+              <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><MessageCircle className="w-4 h-4" /></a>
             </div>
             <span className="hidden sm:block opacity-40">|</span>
             <Link to="/siparis-takip" className="hover:text-white/80 transition uppercase tracking-tight text-[10px] sm:text-[12px]">Sipariş Takibi</Link>
@@ -106,11 +123,13 @@ const Navbar = () => {
             {isOpen ? <X className="w-7 h-7" /> : <Menu className="w-7 h-7" />}
           </button>
 
-          {/* Logo (Center-left on mobile, left on desktop) */}
-          <Link to="/" className="flex-shrink-0 group mr-auto md:mr-0">
-            <span className="text-lg sm:text-2xl md:text-3xl font-black text-primary tracking-tighter transition-all group-hover:scale-105 inline-block uppercase leading-tight">
-              SVN PROFİL <br className="sm:hidden" /> <span className="text-white">ARMATÜR</span>
-            </span>
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0 group mr-auto md:mr-0 flex items-center gap-3 md:gap-4">
+            <img src={logo} alt="SVN PROFİL ARMATÜR" className="h-16 md:h-24 w-auto object-contain transition-transform group-hover:scale-105" />
+            <div className="flex flex-col">
+              <span className="text-white font-black text-lg md:text-2xl tracking-tighter leading-none">SVN PROFİL</span>
+              <span className="text-primary font-bold text-[10px] md:text-sm tracking-[0.2em] leading-none mt-1">ARMATÜR</span>
+            </div>
           </Link>
 
           {/* Search Bar (Desktop Only) */}
@@ -229,7 +248,7 @@ const Navbar = () => {
       </div>
 
       {/* Category Bar (Desktop) */}
-      <div className="hidden md:block bg-[#0d1117] border-t border-[#2281BB]/20 shadow-soft">
+      <div className="hidden md:block bg-[#151a23] border-t border-[#2281BB]/20 shadow-soft">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-start gap-1 py-1">
             <Link
@@ -295,7 +314,7 @@ const Navbar = () => {
 
       {/* Mobile Menu Content */}
       {isOpen && (
-        <div className="md:hidden bg-[#0d1117] border-t border-[#2281BB]/20 py-4 absolute inset-x-0 top-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in max-h-[85vh] overflow-y-auto z-[60]">
+        <div className="md:hidden bg-[#151a23] border-t border-[#2281BB]/20 py-4 absolute inset-x-0 top-full shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-fade-in max-h-[85vh] overflow-y-auto z-[60]">
           <div className="px-4 flex flex-col gap-2">
             <Link
               to="/urunler"

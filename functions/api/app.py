@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import auth, products, orders, payment
+from api.routes import auth, products, orders, payment
 
 app = FastAPI(title="Yapı Malzemesi API", version="1.0.0")
 

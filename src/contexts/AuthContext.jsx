@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -12,6 +13,7 @@ import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase';
 
 const AuthContext = createContext();
+const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -140,33 +142,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   // E-posta / Şifre ile Kayıt
-  const register = async (name, email, password) => {
-    // 1. Firebase Auth'a kaydet
-    const result = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = result.user;
-
-    // 2. Profil adını güncelle ve Doğrulama E-postası gönder
+  const register = async (name, email, password, phone) => {
     try {
-      await updateProfile(firebaseUser, { displayName: name });
-      await sendEmailVerification(firebaseUser); // Kullanıcıya doğrulama maili gönder
-    } catch (e) {
-      console.warn('Profil/Doğrulama maili hatası:', e);
-    }
-
-    // 3. Firestore'a kaydet (hata olursa kayıt yine de tamamlanır)
-    try {
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
+      // Backend üzerinden kayıt yap (Backend Auth kullanıcısını oluşturur ve e-postayı gönderir)
+      const response = await axios.post(`${API_URL}/auth/signup`, {
         name,
         email,
-        picture: null,
-        role: 'user',
-        createdAt: new Date().toISOString(),
+        password,
+        phone
       });
-    } catch (e) {
-      console.warn('Firestore kayıt hatası (önemli değil):', e);
-    }
 
-    return firebaseUser;
+      return response.data;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error.response?.data?.detail || error.message || 'Kayıt sırasında bir hata oluştu';
+    }
   };
 
   // Çıkış

@@ -13,8 +13,8 @@ class EmailService:
         self.port = int(os.environ.get('EMAIL_PORT', 587))
         self.user = os.environ.get('EMAIL_USER')
         self.password = os.environ.get('EMAIL_PASS')
-        self.from_email = f"Yapı Malzemesi <{self.user}>"
-        self.frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+        self.from_email = f"SVN PROFIL ARMATUR <{self.user}>"
+        self.frontend_url = os.environ.get('FRONTEND_URL', 'https://ramazan-seven.web.app')
 
     def send_email(self, to_email, subject, html_content):
         msg = MIMEMultipart()
@@ -42,18 +42,20 @@ class EmailService:
         <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: #2563eb; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">🏗️ Yapı Malzemesi</div>
+                <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">SVN PROFIL ARMATUR</div>
                 <h1>Hoş Geldiniz!</h1>
             </div>
             <div style="background: #f9fafb; padding: 40px; border-radius: 0 0 10px 10px;">
                 <h2>Merhaba {name},</h2>
-                <p>Yapı Malzemesi platformuna kaydolduğunuz için teşekkür ederiz!</p>
+                <p>SVN PROFIL ARMATUR platformuna kaydolduğunuz için teşekkür ederiz!</p>
                 <p>Hesabınızı aktive etmek için lütfen aşağıdaki butona tıklayın:</p>
-                <a href="{verification_url}" style="display: inline-block; background: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Email Adresimi Doğrula</a>
+                <a href="{verification_url}" target="_blank" style="display: inline-block; background: #2563eb; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Email Adresimi Doğrula</a>
+                <p style="font-size: 12px; color: #666;">Eğer buton çalışmıyorsa aşağıdaki linki tarayıcınıza kopyalayıp yapıştırabilirsiniz:</p>
+                <p style="font-size: 12px; color: #2563eb; word-break: break-all;">{verification_url}</p>
                 <p>Bu link 24 saat boyunca geçerlidir.</p>
             </div>
             <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-                <p>© 2024 Yapı Malzemesi. Tüm hakları saklıdır.</p>
+                <p>© 2024 SVN PROFIL ARMATUR. Tüm hakları saklıdır.</p>
             </div>
         </body>
         </html>
@@ -66,18 +68,18 @@ class EmailService:
         <html>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: #dc2626; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">🏗️ Yapı Malzemesi</div>
+                <div style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">SVN PROFIL ARMATUR</div>
                 <h1>Şifre Sıfırlama</h1>
             </div>
             <div style="background: #f9fafb; padding: 40px; border-radius: 0 0 10px 10px;">
                 <h2>Merhaba {name},</h2>
                 <p>Şifrenizi sıfırlama talebinde bulundunuz.</p>
                 <p>Şifrenizi sıfırlamak için aşağıdaki butona tıklayın:</p>
-                <a href="{reset_url}" style="display: inline-block; background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Şifremi Sıfırla</a>
+                <a href="{reset_url}" target="_blank" style="display: inline-block; background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0;">Şifremi Sıfırla</a>
                 <p>Bu link 1 saat boyunca geçerlidir.</p>
             </div>
             <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
-                <p>© 2024 Yapı Malzemesi. Tüm hakları saklıdır.</p>
+                <p>© 2024 SVN PROFIL ARMATUR. Tüm hakları saklıdır.</p>
             </div>
         </body>
         </html>

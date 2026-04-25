@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { db } from '../../firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { Settings, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { doc, getDoc, setDoc, collection, getDocs, deleteDoc, updateDoc } from 'firebase/firestore';
+import { Settings, Save, AlertCircle, CheckCircle, AlertTriangle, Trash2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const AdminSettings = () => {
   const [settings, setSettings] = useState({
@@ -11,6 +12,7 @@ const AdminSettings = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [resettingSales, setResettingSales] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
@@ -51,6 +53,37 @@ const AdminSettings = () => {
     }
   };
 
+  const handleResetSales = async () => {
+    if (!window.confirm("DİKKAT: Sistemdeki tüm siparişler silinecek ve satılan ürün adetleri sıfırlanacaktır. Bu işlem GERİ ALINAMAZ. Devam etmek istiyor musunuz?")) {
+      return;
+    }
+
+    setResettingSales(true);
+    try {
+      // 1. Siparişleri sil
+      const ordersSnapshot = await getDocs(collection(db, 'orders'));
+      const deletePromises = ordersSnapshot.docs.map(orderDoc => deleteDoc(orderDoc.ref));
+      await Promise.all(deletePromises);
+
+      // 2. Ürünlerin 'sold' (satılma sayısı) değerini 0 yap
+      const productsSnapshot = await getDocs(collection(db, 'products'));
+      const updatePromises = productsSnapshot.docs.map(productDoc => {
+        if (productDoc.data().sold && productDoc.data().sold > 0) {
+          return updateDoc(productDoc.ref, { sold: 0 });
+        }
+        return Promise.resolve();
+      });
+      await Promise.all(updatePromises);
+
+      toast.success("Tüm satış verileri ve siparişler başarıyla sıfırlandı!");
+    } catch (error) {
+      console.error("Sıfırlama hatası:", error);
+      toast.error("Sıfırlama işlemi sırasında bir hata oluştu.");
+    } finally {
+      setResettingSales(false);
+    }
+  };
+
   if (loading) return <div className="text-center p-8">Yükleniyor...</div>;
 
   return (
@@ -62,7 +95,6 @@ const AdminSettings = () => {
 
       <div className="bg-white rounded-lg shadow-industrial p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           {/* Kargo Ücreti */}
           <div>
             <label className="block text-sm font-medium text-secondary-700 mb-1">
@@ -134,6 +166,26 @@ const AdminSettings = () => {
             {saving ? 'Kaydediliyor...' : 'Ayarları Kaydet'}
           </button>
         </form>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-industrial p-6 mt-8 border border-red-100">
+        <div className="flex items-center gap-3 mb-4">
+          <AlertTriangle className="w-6 h-6 text-red-600" />
+          <h2 className="text-xl font-bold text-secondary-800">Tehlikeli İşlemler</h2>
+        </div>
+        <p className="text-secondary-600 mb-6 text-sm">
+          Sistemde test amaçlı oluşturulan satış verilerini sıfırlamak için aşağıdaki butonu kullanabilirsiniz. Bu işlem sistemdeki <strong>tüm siparişleri siler</strong> ve ürünlerin satılma sayılarını <strong>0 yapar</strong>. Bu işlem kesinlikle geri alınamaz.
+        </p>
+        <button
+          onClick={handleResetSales}
+          disabled={resettingSales}
+          className={`px-4 py-3 rounded-md font-bold text-white transition flex items-center justify-center gap-2 w-full md:w-auto ${
+            resettingSales ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'
+          }`}
+        >
+          <Trash2 className="w-5 h-5" />
+          {resettingSales ? 'Sıfırlanıyor...' : 'Tüm Satışları ve Siparişleri Sıfırla'}
+        </button>
       </div>
     </div>
   );

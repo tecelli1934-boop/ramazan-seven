@@ -8,7 +8,7 @@
   }
 
   body {
-    background-color: #0d1117;
+    background-color: #151a23;
     color: #f0f6fc;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
@@ -62,7 +62,7 @@
 
 /* ── Backgrounds ─────────────────────────────────────────────────────────── */
 .bg-white                   { background-color: #161b22; }
-.bg-gray-50                 { background-color: #0d1117; }
+.bg-gray-50                 { background-color: #151a23; }
 .bg-gray-100                { background-color: #161b22; }
 .bg-gray-200                { background-color: #21262d; }
 .bg-gray-800                { background-color: #010409; }
@@ -187,7 +187,7 @@
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track  { background: #0d1117; }
+.custom-scrollbar::-webkit-scrollbar-track  { background: #151a23; }
 .custom-scrollbar::-webkit-scrollbar-thumb  { background: rgba(34, 129, 187, 0.4); border-radius: 4px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(34, 129, 187, 0.7); }
 /* Secondary overrides for dark mode */
@@ -198,7 +198,7 @@
 .text-secondary-500 { color: #8b949e; }
 .text-secondary-400 { color: #6e7681; }
 .text-secondary-300 { color: #6e7681; }
-.bg-secondary-50 { background-color: #0d1117; }
+.bg-secondary-50 { background-color: #151a23; }
 .bg-secondary-100 { background-color: #161b22; }
 .bg-secondary-200 { background-color: #21262d; }
 .hover\:bg-secondary-50:hover { background-color: rgba(34, 129, 187, 0.15) !important; }

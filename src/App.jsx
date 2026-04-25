@@ -33,6 +33,7 @@ import PageManagement from './pages/admin/PageManagement';
 import AdminProfile from './pages/admin/AdminProfile';
 import { seedSiteContent } from './utils/seedSiteContent';
 import AdminRoute from './components/common/AdminRoute';
+import ScrollToTop from './components/common/ScrollToTop';
 import { auth, db, messaging, getToken, onMessage } from './firebase';
 import axios from 'axios';
 import { useEffect } from 'react';
@@ -48,6 +49,7 @@ import ReturnPolicy from './pages/legal/ReturnPolicy';
 import ContactPage from './pages/shop/ContactPage';
 import OrderTrackingPage from './pages/shop/OrderTrackingPage';
 import AboutPage from './pages/shop/AboutPage';
+import ProductDetailPage from './pages/shop/ProductDetailPage';
 import WhatsAppButton from './components/ui/WhatsAppButton';
 import ChatBot from './components/ui/ChatBot';
 
@@ -58,6 +60,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <AuthProvider>
         <SettingsProvider>
           <CategoryProvider>
@@ -73,6 +76,7 @@ function App() {
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/urunler" element={<AllProductsPage />} />
+                    <Route path="/urun/:productSlug" element={<ProductDetailPage />} />
                     <Route path="/kategori/:categorySlug" element={<CategoryPage />} />
                     <Route path="/cart" element={<CartPage />} />
                     <Route path="/giris" element={<LoginPage />} />

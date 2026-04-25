@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter, Youtube, ArrowUp, MessageCircle } from 'lucide-react';
 import { db } from '../../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
+import logo from '../../assets/logo.png';
 
 const Footer = () => {
   const [contactInfo, setContactInfo] = useState({
@@ -24,6 +25,9 @@ const Footer = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const phoneNumber = contactInfo.mobile || contactInfo.phone || '+905555555555';
+  const whatsappNumber = phoneNumber.replace(/[^0-9]/g, '');
 
   return (
     <footer className="mt-auto">
@@ -62,7 +66,7 @@ const Footer = () => {
           <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group">
             <Youtube className="w-5 h-5 text-gray-400 group-hover:text-white" />
           </a>
-          <a href="https://wa.me/905555555555" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group">
+          <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-primary hover:border-primary transition-all group">
             <MessageCircle className="w-5 h-5 text-gray-400 group-hover:text-white" />
           </a>
         </div>
@@ -74,9 +78,13 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
             {/* Corporate Info */}
             <div className="space-y-6">
-              <span className="text-2xl font-black text-primary tracking-tighter block uppercase">
-                SVN PROFİL <span className="text-gray-900">ARMATÜR</span>
-              </span>
+              <Link to="/" className="flex items-center gap-4 group mb-6">
+                <img src={logo} alt="SVN PROFİL ARMATÜR" className="h-20 w-auto object-contain transition-transform group-hover:scale-105" />
+                <div className="flex flex-col text-secondary-900">
+                  <span className="font-black text-xl tracking-tighter leading-none">SVN PROFİL</span>
+                  <span className="text-primary font-bold text-sm tracking-[0.2em] leading-none mt-1">ARMATÜR</span>
+                </div>
+              </Link>
               <p className="text-gray-500 text-sm leading-relaxed font-medium">
                 Profil ve armatür çözümlerinden yapı malzemelerine kadar geniş ürün yelpazemizle projelerinizde yanınızdayız.
               </p>

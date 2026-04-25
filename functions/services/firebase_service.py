@@ -22,7 +22,14 @@ def initialize_firebase():
                 firebase_admin.initialize_app(cred)
             except Exception as e:
                 print(f"Firebase initialization warning: {e}")
-                firebase_admin.initialize_app()
+                # During local CLI analysis, ADC lookup can be very slow and cause timeouts.
+                # We only initialize if we're likely in a real environment.
+                if os.environ.get('K_SERVICE') or os.environ.get('FIREBASE_CONFIG'):
+                    firebase_admin.initialize_app()
+                else:
+                    # Mock initialization for local analysis if needed, 
+                    # or just skip to avoid timeout.
+                    pass
 
 initialize_firebase()
 

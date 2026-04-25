@@ -70,7 +70,7 @@ const RegisterPage = () => {
     setSuccess('');
 
     try {
-      await register(formData.name.trim(), formData.email.trim().toLowerCase(), formData.password);
+      await register(formData.name.trim(), formData.email.trim().toLowerCase(), formData.password, formData.phone);
       setSuccess('Kayıt başarılı! Lütfen e-postanızı doğrulayın.');
       setLoading(false); 
       // Doğrulama bilgi sayfasına yönlendir ve e-posta adresini ilet

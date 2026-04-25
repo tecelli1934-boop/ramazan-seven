@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, ShoppingCart, ChevronRight } from 'lucide-react';
 import { useCart } from '../../contexts/CartContext';
 import FavoriteButton from '../ui/FavoriteButton';
@@ -218,7 +219,10 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Resim alanı */}
-      <div className="relative aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50/50 flex items-center justify-center p-6">
+      <Link 
+        to={`/urun/${product.slug || product.id}`}
+        className="relative aspect-square mb-4 overflow-hidden rounded-xl bg-gray-50/50 flex items-center justify-center p-6 block"
+      >
         {imageError ? (
           <div className={`w-full h-full flex items-center justify-center ${product.stock <= 0 ? 'opacity-30' : ''}`}>
             <span className="text-gray-300 text-[10px] font-black uppercase tracking-widest">Görsel Yok</span>
@@ -231,12 +235,14 @@ const ProductCard = ({ product }) => {
             onError={() => setImageError(true)}
           />
         )}
-      </div>
+      </Link>
 
       <div className="flex-1 flex flex-col">
-        <h3 className="text-[15px] font-black text-secondary-800 mb-1 leading-snug uppercase tracking-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[40px] italic">
-          {product.name}
-        </h3>
+        <Link to={`/urun/${product.slug || product.id}`}>
+          <h3 className="text-[15px] font-black text-secondary-800 mb-1 leading-snug uppercase tracking-tight group-hover:text-primary transition-colors line-clamp-2 min-h-[40px] italic">
+            {product.name}
+          </h3>
+        </Link>
 
         {product.description && (
           <p className="text-[11px] text-gray-400 mb-4 line-clamp-1 font-medium">{product.description}</p>

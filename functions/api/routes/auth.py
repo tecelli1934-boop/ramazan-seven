@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from ...models.schemas import UserCreate, User
-from ...services.firebase_service import db, auth as firebase_auth
-from ...services.email_service import email_service
+from models.schemas import UserCreate, User
+from services.firebase_service import db, auth as firebase_auth
+from services.email_service import email_service
 from passlib.context import CryptContext
 import jwt
 import os
@@ -25,40 +25,59 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 @router.post("/signup")
 async def signup(user_data: UserCreate):
-    # Check if user exists
+    # Check if user exists in Firestore
     users_ref = db.collection('users')
     existing_user = users_ref.where('email', '==', user_data.email).get()
     if existing_user:
         raise HTTPException(status_code=400, detail="Bu email adresi zaten kayıtlı")
 
-    # Hash password
-    hashed_password = pwd_context.hash(user_data.password)
-    
-    # Create user in Firestore
-    new_user = {
-        "name": user_data.name,
-        "email": user_data.email,
-        "password": hashed_password,
-        "phone": user_data.phone,
-        "role": "user",
-        "active": True,
-        "emailVerified": False,
-        "createdAt": datetime.utcnow()
-    }
-    
-    doc_ref = users_ref.add(new_user)
-    user_id = doc_ref[1].id
+    try:
+        # 1. Create user in Firebase Auth
+        auth_user = firebase_auth.create_user(
+            email=user_data.email,
+            password=user_data.password,
+            display_name=user_data.name,
+            disabled=True # Disable until email verified
+        )
+        user_id = auth_user.uid
 
-    # Generate verification token
-    token = email_service.generate_token()
-    db.collection('verification_tokens').add({
-        "userId": user_id,
-        "token": token,
-        "expires": datetime.utcnow() + timedelta(hours=24)
-    })
+        # 2. Hash password for Firestore (optional if only using Auth for login, but let's keep it for compatibility)
+        hashed_password = pwd_context.hash(user_data.password)
+        
+        # 3. Create user in Firestore
+        new_user = {
+            "name": user_data.name,
+            "email": user_data.email,
+            "password": hashed_password,
+            "phone": user_data.phone,
+            "role": "user",
+            "active": True,
+            "emailVerified": False,
+            "uid": user_id,
+            "createdAt": datetime.utcnow()
+        }
+        
+        db.collection('users').document(user_id).set(new_user)
 
-    # Send email
-    email_service.send_verification_email(user_data.name, user_data.email, token)
+        # 4. Generate verification token
+        token = email_service.generate_token()
+        db.collection('verification_tokens').add({
+            "userId": user_id,
+            "token": token,
+            "expires": datetime.utcnow() + timedelta(hours=24)
+        })
+
+        # 5. Send custom email (Our fixed one!)
+        email_service.send_verification_email(user_data.name, user_data.email, token)
+
+        return {
+            "status": "success",
+            "message": "Kayıt başarılı! Lütfen email adresinizi doğrulayın.",
+            "data": {"user": {"id": user_id, "name": user_data.name, "email": user_data.email}}
+        }
+    except Exception as e:
+        print(f"Signup error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
     return {
         "status": "success",
@@ -115,6 +134,13 @@ async def verify_email(token: str):
     
     user_id = token_data.get('userId')
     db.collection('users').document(user_id).update({"emailVerified": True})
+    
+    # Enable user in Firebase Auth
+    try:
+        firebase_auth.update_user(user_id, disabled=False)
+    except Exception as e:
+        print(f"Error enabling user in Auth: {e}")
+
     token_doc.reference.delete()
 
     return {"status": "success", "message": "Email adresiniz başarıyla doğrulandı!"}

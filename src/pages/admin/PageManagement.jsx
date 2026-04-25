@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { Save, FileText, Phone, MapPin, Mail, Clock, AlertCircle } from 'lucide-react';
+import { Save, FileText, Phone, MapPin, Mail, Clock, AlertCircle, Info } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const PageManagement = () => {
@@ -61,6 +61,7 @@ const PageManagement = () => {
     { id: 'privacy', label: 'Gizlilik Politikası', icon: FileText },
     { id: 'sales', label: 'Satış Sözleşmesi', icon: FileText },
     { id: 'return', label: 'İade Koşulları', icon: FileText },
+    { id: 'about', label: 'Hakkımızda', icon: Info },
     { id: 'contact', label: 'İletişim Bilgileri', icon: Phone },
   ];
 
